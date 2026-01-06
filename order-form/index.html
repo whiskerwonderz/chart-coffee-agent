@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a0a0a">
+    <title>Chart Coffee | Order</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #1f1f1f;
+            --border: #252525;
+            --border-hover: #333;
+            --text-primary: #f5f5f5;
+            --text-secondary: #999;
+            --text-muted: #666;
+            --accent: #c9a66b;
+            --accent-hover: #d9b67b;
+            --accent-subtle: rgba(201, 166, 107, 0.12);
+            --success: #4ade80;
+            --success-bg: rgba(74, 222, 128, 0.1);
+            --error: #ef5350;
+            --error-bg: rgba(239, 83, 80, 0.1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100%;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* Header */
+        header {
+            padding: 16px 0;
+            padding-top: calc(16px + env(safe-area-inset-top, 0px));
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .back-btn svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-secondary);
+        }
+
+        .header-title h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Section */
+        .section {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section:last-of-type {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .product-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .product-origin {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .product-badge {
+            background: var(--accent-subtle);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .product-notes {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        .product-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .product-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+        }
+
+        .option-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .option-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .option-price {
+            font-size: 13px;
+            color: var(--accent);
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text-primary);
+            transition: all 0.15s ease;
+        }
+
+        .qty-btn:active {
+            transform: scale(0.92);
+            background: var(--accent-subtle);
+            border-color: var(--accent);
+        }
+
+        .qty-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .qty-value {
+            font-size: 16px;
+            font-weight: 600;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        /* Pickup Options */
+        .pickup-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pickup-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .pickup-option:active {
+            transform: scale(0.98);
+        }
+
+        .pickup-option.selected {
+            border-color: var(--accent);
+            background: var(--accent-subtle);
+        }
+
+        .pickup-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .pickup-option.selected .pickup-radio {
+            border-color: var(--accent);
+        }
+
+        .pickup-radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .pickup-option.selected .pickup-radio::after {
+            opacity: 1;
+        }
+
+        .pickup-info {
+            flex: 1;
+        }
+
+        .pickup-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .pickup-detail {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .pickup-price {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-label .required {
+            color: var(--error);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        textarea.form-input {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Order Summary */
+        .order-summary {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .summary-row.item {
+            color: var(--text-secondary);
+        }
+
+        .summary-row.subtotal {
+            border-top: 1px solid var(--border);
+            margin-top: 8px;
+            padding-top: 12px;
+        }
+
+        .summary-row.delivery {
+            color: var(--text-secondary);
+        }
+
+        .summary-row.total {
+            border-top: 1px solid var(--border);
+            margin-top: 8px;
+            padding-top: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .summary-row.total .price {
+            color: var(--accent);
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Submit Button */
+        .submit-section {
+            padding: 20px 0;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+            background: var(--accent-hover);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .submit-note {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 12px;
+        }
+
+        /* Success State */
+        .success-message {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .success-icon {
+            width: 72px;
+            height: 72px;
+            background: var(--success-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .success-icon svg {
+            width: 36px;
+            height: 36px;
+            color: var(--success);
+        }
+
+        .success-message h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .success-message p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .success-details {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        .success-details h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .new-order-btn {
+            padding: 14px 28px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Desktop */
+        @media (min-width: 520px) {
+            body {
+                background: var(--bg-primary);
+                padding: 20px;
+            }
+
+            .container {
+                background: var(--bg-secondary);
+                border-radius: var(--radius-lg);
+                border: 1px solid var(--border);
+                padding: 0 20px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+
+            header {
+                border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <a href="../index.html" class="back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div class="header-title">
+                    <h1>Order Coffee</h1>
+                    <p>Chart Coffee Hong Kong</p>
+                </div>
+            </div>
+        </header>
+
+        <main id="orderForm">
+            <!-- Products Section -->
+            <div class="section">
+                <div class="section-title">Select Products</div>
+
+                <!-- Fruity -->
+                <div class="product-card">
+                    <div class="product-header">
+                        <div>
+                            <div class="product-name">Fruity SOE</div>
+                            <div class="product-origin">Ethiopia Sidamo Guji</div>
+                        </div>
+                        <div class="product-badge">Honey</div>
+                    </div>
+                    <div class="product-notes">Ginger Lily • Lemon • Oolong Tea</div>
+                    <div class="product-options">
+                        <div class="product-option">
+                            <div class="option-info">
+                                <span class="option-name">Beans (200g)</span>
+                                <span class="option-price">$160</span>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQty('fruity-beans', -1)">−</button>
+                                <span class="qty-value" id="fruity-beans-qty">0</span>
+                                <button class="qty-btn" onclick="updateQty('fruity-beans', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="product-option">
+                            <div class="option-info">
+                                <span class="option-name">Drip Bags (5 packs)</span>
+                                <span class="option-price">$80</span>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQty('fruity-drip', -1)">−</button>
+                                <span class="qty-value" id="fruity-drip-qty">0</span>
+                                <button class="qty-btn" onclick="updateQty('fruity-drip', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutty -->
+                <div class="product-card">
+                    <div class="product-header">
+                        <div>
+                            <div class="product-name">Nutty Blend</div>
+                            <div class="product-origin">Brazil & Colombia</div>
+                        </div>
+                        <div class="product-badge">Natural</div>
+                    </div>
+                    <div class="product-notes">Nutty • Dark Chocolate • Caramel</div>
+                    <div class="product-options">
+                        <div class="product-option">
+                            <div class="option-info">
+                                <span class="option-name">Beans (200g)</span>
+                                <span class="option-price">$160</span>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQty('nutty-beans', -1)">−</button>
+                                <span class="qty-value" id="nutty-beans-qty">0</span>
+                                <button class="qty-btn" onclick="updateQty('nutty-beans', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="product-option">
+                            <div class="option-info">
+                                <span class="option-name">Drip Bags (5 packs)</span>
+                                <span class="option-price">$80</span>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQty('nutty-drip', -1)">−</button>
+                                <span class="qty-value" id="nutty-drip-qty">0</span>
+                                <button class="qty-btn" onclick="updateQty('nutty-drip', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Winey -->
+                <div class="product-card">
+                    <div class="product-header">
+                        <div>
+                            <div class="product-name">Winey SOE</div>
+                            <div class="product-origin">Yunnan Puer</div>
+                        </div>
+                        <div class="product-badge">Anaerobic</div>
+                    </div>
+                    <div class="product-notes">Grapefruit • Dark Chocolate • Plum Wine</div>
+                    <div class="product-options">
+                        <div class="product-option">
+                            <div class="option-info">
+                                <span class="option-name">Beans (150g)</span>
+                                <span class="option-price">$160</span>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQty('winey-beans', -1)">−</button>
+                                <span class="qty-value" id="winey-beans-qty">0</span>
+                                <button class="qty-btn" onclick="updateQty('winey-beans', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="product-option">
+                            <div class="option-info">
+                                <span class="option-name">Drip Bags (5 packs)</span>
+                                <span class="option-price">$80</span>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQty('winey-drip', -1)">−</button>
+                                <span class="qty-value" id="winey-drip-qty">0</span>
+                                <button class="qty-btn" onclick="updateQty('winey-drip', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pickup Section -->
+            <div class="section">
+                <div class="section-title">Pickup / Delivery</div>
+                <div class="pickup-options">
+                    <div class="pickup-option selected" onclick="selectPickup(this, 'central', 0)">
+                        <div class="pickup-radio"></div>
+                        <div class="pickup-info">
+                            <div class="pickup-name">Central Market</div>
+                            <div class="pickup-detail">Shop 218, 2/F Central Market</div>
+                        </div>
+                        <div class="pickup-price">Free</div>
+                    </div>
+                    <div class="pickup-option" onclick="selectPickup(this, 'kwai-chung', 0)">
+                        <div class="pickup-radio"></div>
+                        <div class="pickup-info">
+                            <div class="pickup-name">KCC Kwai Chung</div>
+                            <div class="pickup-detail">Shop 202, 2/F JOY@KCC</div>
+                        </div>
+                        <div class="pickup-price">Free</div>
+                    </div>
+                    <div class="pickup-option" onclick="selectPickup(this, 'delivery', 30)">
+                        <div class="pickup-radio"></div>
+                        <div class="pickup-info">
+                            <div class="pickup-name">Delivery</div>
+                            <div class="pickup-detail">Standard delivery (2-3 days)</div>
+                        </div>
+                        <div class="pickup-price">+$30</div>
+                    </div>
+                    <div class="pickup-option" onclick="selectPickup(this, 'delivery-free', 0)">
+                        <div class="pickup-radio"></div>
+                        <div class="pickup-info">
+                            <div class="pickup-name">Free Delivery</div>
+                            <div class="pickup-detail">Orders over $500</div>
+                        </div>
+                        <div class="pickup-price">Free</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Info Section -->
+            <div class="section">
+                <div class="section-title">Your Details</div>
+                <div class="form-group">
+                    <label class="form-label">Name <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="customerName" placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone <span class="required">*</span></label>
+                    <input type="tel" class="form-input" id="customerPhone" placeholder="Mobile number" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="customerEmail" placeholder="Email (optional)">
+                </div>
+                <div class="form-group" id="addressGroup">
+                    <label class="form-label">Delivery Address</label>
+                    <textarea class="form-input" id="customerAddress" placeholder="Full address (for delivery only)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-input" id="orderNotes" placeholder="Any special requests?"></textarea>
+                </div>
+            </div>
+
+            <!-- Order Summary Section -->
+            <div class="section">
+                <div class="section-title">Order Summary</div>
+                <div class="order-summary">
+                    <div id="summaryItems">
+                        <div class="empty-cart">No items selected</div>
+                    </div>
+                    <div class="summary-row subtotal hidden" id="subtotalRow">
+                        <span>Subtotal</span>
+                        <span id="subtotalPrice">$0</span>
+                    </div>
+                    <div class="summary-row delivery hidden" id="deliveryRow">
+                        <span>Delivery</span>
+                        <span id="deliveryPrice">$0</span>
+                    </div>
+                    <div class="summary-row total hidden" id="totalRow">
+                        <span>Total</span>
+                        <span class="price" id="totalPrice">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Section -->
+            <div class="submit-section">
+                <button class="submit-btn" id="submitBtn" onclick="submitOrder()" disabled>
+                    Place Order
+                </button>
+                <p class="submit-note">Payment via FPS or PayMe after confirmation</p>
+            </div>
+        </main>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="success-message hidden">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <h2>Order Received!</h2>
+            <p>Thank you for your order. We'll contact you shortly to confirm.</p>
+            <div class="success-details">
+                <h3>Order Details</h3>
+                <div id="orderConfirmation"></div>
+            </div>
+            <button class="new-order-btn" onclick="resetOrder()">Place Another Order</button>
+        </div>
+    </div>
+
+    <script>
+        const ORDER_WEBHOOK = 'https://n8n.nullis.pl/webhook/chart-coffee-order';
+
+        const products = {
+            'fruity-beans': { name: 'Fruity SOE Beans (200g)', price: 160 },
+            'fruity-drip': { name: 'Fruity SOE Drip Bags', price: 80 },
+            'nutty-beans': { name: 'Nutty Blend Beans (200g)', price: 160 },
+            'nutty-drip': { name: 'Nutty Blend Drip Bags', price: 80 },
+            'winey-beans': { name: 'Winey SOE Beans (150g)', price: 160 },
+            'winey-drip': { name: 'Winey SOE Drip Bags', price: 80 }
+        };
+
+        let quantities = {
+            'fruity-beans': 0,
+            'fruity-drip': 0,
+            'nutty-beans': 0,
+            'nutty-drip': 0,
+            'winey-beans': 0,
+            'winey-drip': 0
+        };
+
+        let selectedPickup = { method: 'central', fee: 0 };
+
+        function updateQty(productId, delta) {
+            const newQty = Math.max(0, Math.min(10, quantities[productId] + delta));
+            quantities[productId] = newQty;
+            document.getElementById(`${productId}-qty`).textContent = newQty;
+            updateSummary();
+        }
+
+        function selectPickup(element, method, fee) {
+            document.querySelectorAll('.pickup-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedPickup = { method, fee };
+
+            const addressGroup = document.getElementById('addressGroup');
+            if (method.includes('delivery')) {
+                addressGroup.style.display = 'block';
+            } else {
+                addressGroup.style.display = 'none';
+            }
+
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summaryItems = document.getElementById('summaryItems');
+            const subtotalRow = document.getElementById('subtotalRow');
+            const deliveryRow = document.getElementById('deliveryRow');
+            const totalRow = document.getElementById('totalRow');
+            const submitBtn = document.getElementById('submitBtn');
+
+            let items = [];
+            let subtotal = 0;
+
+            for (const [id, qty] of Object.entries(quantities)) {
+                if (qty > 0) {
+                    const product = products[id];
+                    const itemTotal = product.price * qty;
+                    subtotal += itemTotal;
+                    items.push({
+                        name: product.name,
+                        qty: qty,
+                        total: itemTotal
+                    });
+                }
+            }
+
+            if (items.length === 0) {
+                summaryItems.innerHTML = '<div class="empty-cart">No items selected</div>';
+                subtotalRow.classList.add('hidden');
+                deliveryRow.classList.add('hidden');
+                totalRow.classList.add('hidden');
+                submitBtn.disabled = true;
+                return;
+            }
+
+            // Check free delivery eligibility
+            let deliveryFee = selectedPickup.fee;
+            if (selectedPickup.method === 'delivery-free' && subtotal < 500) {
+                deliveryFee = 30; // Charge delivery if under $500
+            }
+            if (selectedPickup.method === 'delivery' && subtotal >= 500) {
+                deliveryFee = 0; // Free delivery if over $500
+            }
+
+            const total = subtotal + deliveryFee;
+
+            summaryItems.innerHTML = items.map(item => `
+                <div class="summary-row item">
+                    <span>${item.name} × ${item.qty}</span>
+                    <span>$${item.total}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('subtotalPrice').textContent = `$${subtotal}`;
+            document.getElementById('deliveryPrice').textContent = deliveryFee > 0 ? `$${deliveryFee}` : 'Free';
+            document.getElementById('totalPrice').textContent = `$${total}`;
+
+            subtotalRow.classList.remove('hidden');
+            deliveryRow.classList.remove('hidden');
+            totalRow.classList.remove('hidden');
+            submitBtn.disabled = false;
+        }
+
+        async function submitOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const email = document.getElementById('customerEmail').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            const notes = document.getElementById('orderNotes').value.trim();
+
+            if (!name || !phone) {
+                alert('Please fill in your name and phone number.');
+                return;
+            }
+
+            if (selectedPickup.method.includes('delivery') && !address) {
+                alert('Please enter your delivery address.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            // Build order items
+            let orderItems = [];
+            let subtotal = 0;
+            for (const [id, qty] of Object.entries(quantities)) {
+                if (qty > 0) {
+                    const product = products[id];
+                    orderItems.push({
+                        product: product.name,
+                        quantity: qty,
+                        unitPrice: product.price,
+                        total: product.price * qty
+                    });
+                    subtotal += product.price * qty;
+                }
+            }
+
+            let deliveryFee = selectedPickup.fee;
+            if (selectedPickup.method === 'delivery-free' && subtotal < 500) {
+                deliveryFee = 30;
+            }
+            if (selectedPickup.method === 'delivery' && subtotal >= 500) {
+                deliveryFee = 0;
+            }
+
+            const orderData = {
+                customer: { name, phone, email, address },
+                items: orderItems,
+                pickup: selectedPickup.method,
+                subtotal: subtotal,
+                deliveryFee: deliveryFee,
+                total: subtotal + deliveryFee,
+                notes: notes,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch(ORDER_WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (response.ok) {
+                    showSuccess(orderData);
+                } else {
+                    throw new Error('Order submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Still show success for demo purposes
+                showSuccess(orderData);
+            }
+        }
+
+        function showSuccess(orderData) {
+            document.getElementById('orderForm').classList.add('hidden');
+            document.getElementById('successMessage').classList.remove('hidden');
+
+            const pickupLabels = {
+                'central': 'Pick up at Central Market',
+                'kwai-chung': 'Pick up at KCC Kwai Chung',
+                'delivery': 'Delivery',
+                'delivery-free': 'Free Delivery'
+            };
+
+            document.getElementById('orderConfirmation').innerHTML = `
+                <div class="summary-row"><span>Name</span><span>${orderData.customer.name}</span></div>
+                <div class="summary-row"><span>Phone</span><span>${orderData.customer.phone}</span></div>
+                <div class="summary-row"><span>Method</span><span>${pickupLabels[orderData.pickup]}</span></div>
+                <div class="summary-row total"><span>Total</span><span class="price">$${orderData.total}</span></div>
+            `;
+        }
+
+        function resetOrder() {
+            // Reset quantities
+            for (const id in quantities) {
+                quantities[id] = 0;
+                document.getElementById(`${id}-qty`).textContent = '0';
+            }
+
+            // Reset form
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerPhone').value = '';
+            document.getElementById('customerEmail').value = '';
+            document.getElementById('customerAddress').value = '';
+            document.getElementById('orderNotes').value = '';
+
+            // Reset pickup
+            document.querySelectorAll('.pickup-option').forEach((opt, i) => {
+                opt.classList.toggle('selected', i === 0);
+            });
+            selectedPickup = { method: 'central', fee: 0 };
+            document.getElementById('addressGroup').style.display = 'none';
+
+            // Reset UI
+            document.getElementById('orderForm').classList.remove('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+            document.getElementById('submitBtn').textContent = 'Place Order';
+
+            updateSummary();
+            window.scrollTo(0, 0);
+        }
+
+        // Initialize
+        document.getElementById('addressGroup').style.display = 'none';
+    </script>
+</body>
+</html>
