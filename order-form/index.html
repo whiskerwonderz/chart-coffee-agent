@@ -717,9 +717,13 @@
                     <label class="form-label">Email</label>
                     <input type="email" class="form-input" id="customerEmail" placeholder="Email (optional)">
                 </div>
-                <div class="form-group" id="addressGroup">
-                    <label class="form-label">Delivery Address</label>
-                    <textarea class="form-input" id="customerAddress" placeholder="Full address (for delivery only)"></textarea>
+                <div class="form-group" id="pickupDateGroup" style="display: block;">
+                    <label class="form-label">Pickup Date <span class="required">*</span></label>
+                    <input type="date" class="form-input" id="pickupDate" min="">
+                </div>
+                <div class="form-group" id="addressGroup" style="display: none;">
+                    <label class="form-label">Delivery Address <span class="required">*</span></label>
+                    <textarea class="form-input" id="customerAddress" placeholder="Full address for delivery"></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Notes</label>
@@ -812,10 +816,14 @@
             selectedPickup = { method, fee };
 
             const addressGroup = document.getElementById('addressGroup');
+            const pickupDateGroup = document.getElementById('pickupDateGroup');
+
             if (method.includes('delivery')) {
                 addressGroup.style.display = 'block';
+                pickupDateGroup.style.display = 'none';
             } else {
                 addressGroup.style.display = 'none';
+                pickupDateGroup.style.display = 'block';
             }
 
             updateSummary();
@@ -888,6 +896,8 @@
             const address = document.getElementById('customerAddress').value.trim();
             const notes = document.getElementById('orderNotes').value.trim();
 
+            const pickupDate = document.getElementById('pickupDate').value;
+
             if (!name || !phone) {
                 alert('Please fill in your name and phone number.');
                 return;
@@ -895,6 +905,11 @@
 
             if (selectedPickup.method.includes('delivery') && !address) {
                 alert('Please enter your delivery address.');
+                return;
+            }
+
+            if (!selectedPickup.method.includes('delivery') && !pickupDate) {
+                alert('Please select a pickup date.');
                 return;
             }
 
@@ -930,6 +945,7 @@
                 customer: { name, phone, email, address },
                 items: orderItems,
                 pickup: selectedPickup.method,
+                pickupDate: pickupDate || null,
                 subtotal: subtotal,
                 deliveryFee: deliveryFee,
                 total: subtotal + deliveryFee,
@@ -967,10 +983,14 @@
                 'delivery-free': 'Free Delivery'
             };
 
+            const pickupDateStr = orderData.pickupDate ? new Date(orderData.pickupDate).toLocaleDateString('en-HK', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : '';
+
             document.getElementById('orderConfirmation').innerHTML = `
                 <div class="summary-row"><span>Name</span><span>${orderData.customer.name}</span></div>
                 <div class="summary-row"><span>Phone</span><span>${orderData.customer.phone}</span></div>
                 <div class="summary-row"><span>Method</span><span>${pickupLabels[orderData.pickup]}</span></div>
+                ${orderData.pickupDate ? `<div class="summary-row"><span>Pickup Date</span><span>${pickupDateStr}</span></div>` : ''}
+                ${orderData.customer.address ? `<div class="summary-row"><span>Address</span><span>${orderData.customer.address}</span></div>` : ''}
                 <div class="summary-row total"><span>Total</span><span class="price">$${orderData.total}</span></div>
             `;
         }
@@ -987,6 +1007,7 @@
             document.getElementById('customerPhone').value = '';
             document.getElementById('customerEmail').value = '';
             document.getElementById('customerAddress').value = '';
+            document.getElementById('pickupDate').value = '';
             document.getElementById('orderNotes').value = '';
 
             // Reset pickup
@@ -995,6 +1016,7 @@
             });
             selectedPickup = { method: 'central', fee: 0 };
             document.getElementById('addressGroup').style.display = 'none';
+            document.getElementById('pickupDateGroup').style.display = 'block';
 
             // Reset UI
             document.getElementById('orderForm').classList.remove('hidden');
@@ -1007,6 +1029,10 @@
 
         // Initialize
         document.getElementById('addressGroup').style.display = 'none';
+
+        // Set min date to today for pickup date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('pickupDate').min = today;
     </script>
 </body>
 </html>
