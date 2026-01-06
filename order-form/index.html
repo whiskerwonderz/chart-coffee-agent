@@ -46,7 +46,7 @@
             color: var(--text-primary);
             line-height: 1.5;
             min-height: 100%;
-            padding-bottom: env(safe-area-inset-bottom, 0px);
+            padding-bottom: 140px;
         }
 
         .container {
@@ -412,13 +412,63 @@
             font-size: 14px;
         }
 
-        /* Submit Button */
-        .submit-section {
-            padding: 20px 0;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        /* Sticky Checkout Bar */
+        .checkout-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border);
+            padding: 12px 16px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+            z-index: 1000;
         }
 
-        .submit-btn {
+        .checkout-bar-inner {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .checkout-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .checkout-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .checkout-items-count {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .checkout-breakdown {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .checkout-total {
+            text-align: right;
+        }
+
+        .checkout-total-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .checkout-total-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .checkout-btn {
             width: 100%;
             padding: 16px;
             background: var(--accent);
@@ -429,23 +479,33 @@
             color: #1a1a1a;
             cursor: pointer;
             transition: all 0.15s ease;
+            min-height: 52px;
         }
 
-        .submit-btn:active {
+        .checkout-btn:active {
             transform: scale(0.98);
             background: var(--accent-hover);
         }
 
-        .submit-btn:disabled {
+        .checkout-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
         }
 
-        .submit-note {
-            text-align: center;
-            font-size: 12px;
+        .checkout-bar.empty .checkout-summary {
+            display: none;
+        }
+
+        .checkout-bar.empty .checkout-btn {
+            background: var(--bg-tertiary);
             color: var(--text-muted);
-            margin-top: 12px;
+        }
+
+        /* Old Submit Section - hidden but kept for structure */
+        .submit-section {
+            display: none;
         }
 
         /* Success State */
@@ -780,6 +840,25 @@
         </div>
     </div>
 
+    <!-- Sticky Checkout Bar -->
+    <div class="checkout-bar empty" id="checkoutBar">
+        <div class="checkout-bar-inner">
+            <div class="checkout-summary">
+                <div class="checkout-details">
+                    <span class="checkout-items-count" id="checkoutItemsCount">0 items</span>
+                    <span class="checkout-breakdown" id="checkoutBreakdown">Subtotal $0 + Delivery $0</span>
+                </div>
+                <div class="checkout-total">
+                    <div class="checkout-total-label">Total</div>
+                    <div class="checkout-total-price" id="checkoutTotalPrice">$0</div>
+                </div>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" onclick="submitOrder()" disabled>
+                Select items to continue
+            </button>
+        </div>
+    </div>
+
     <script>
         const ORDER_WEBHOOK = 'https://n8n.nullis.pl/webhook/chart-coffee-order';
 
@@ -834,31 +913,25 @@
             const subtotalRow = document.getElementById('subtotalRow');
             const deliveryRow = document.getElementById('deliveryRow');
             const totalRow = document.getElementById('totalRow');
-            const submitBtn = document.getElementById('submitBtn');
+            const checkoutBar = document.getElementById('checkoutBar');
+            const checkoutBtn = document.getElementById('checkoutBtn');
 
             let items = [];
             let subtotal = 0;
+            let totalQty = 0;
 
             for (const [id, qty] of Object.entries(quantities)) {
                 if (qty > 0) {
                     const product = products[id];
                     const itemTotal = product.price * qty;
                     subtotal += itemTotal;
+                    totalQty += qty;
                     items.push({
                         name: product.name,
                         qty: qty,
                         total: itemTotal
                     });
                 }
-            }
-
-            if (items.length === 0) {
-                summaryItems.innerHTML = '<div class="empty-cart">No items selected</div>';
-                subtotalRow.classList.add('hidden');
-                deliveryRow.classList.add('hidden');
-                totalRow.classList.add('hidden');
-                submitBtn.disabled = true;
-                return;
             }
 
             // Check free delivery eligibility
@@ -872,21 +945,41 @@
 
             const total = subtotal + deliveryFee;
 
-            summaryItems.innerHTML = items.map(item => `
-                <div class="summary-row item">
-                    <span>${item.name} × ${item.qty}</span>
-                    <span>$${item.total}</span>
-                </div>
-            `).join('');
+            // Update sticky checkout bar
+            if (items.length === 0) {
+                checkoutBar.classList.add('empty');
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'Select items to continue';
+                summaryItems.innerHTML = '<div class="empty-cart">No items selected</div>';
+                subtotalRow.classList.add('hidden');
+                deliveryRow.classList.add('hidden');
+                totalRow.classList.add('hidden');
+            } else {
+                checkoutBar.classList.remove('empty');
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = `Place Order • $${total}`;
 
-            document.getElementById('subtotalPrice').textContent = `$${subtotal}`;
-            document.getElementById('deliveryPrice').textContent = deliveryFee > 0 ? `$${deliveryFee}` : 'Free';
-            document.getElementById('totalPrice').textContent = `$${total}`;
+                // Update checkout bar details
+                document.getElementById('checkoutItemsCount').textContent = `${totalQty} item${totalQty > 1 ? 's' : ''}`;
+                document.getElementById('checkoutBreakdown').textContent = `Subtotal $${subtotal}${deliveryFee > 0 ? ` + Delivery $${deliveryFee}` : ' + Free delivery'}`;
+                document.getElementById('checkoutTotalPrice').textContent = `$${total}`;
 
-            subtotalRow.classList.remove('hidden');
-            deliveryRow.classList.remove('hidden');
-            totalRow.classList.remove('hidden');
-            submitBtn.disabled = false;
+                // Update order summary section
+                summaryItems.innerHTML = items.map(item => `
+                    <div class="summary-row item">
+                        <span>${item.name} × ${item.qty}</span>
+                        <span>$${item.total}</span>
+                    </div>
+                `).join('');
+
+                document.getElementById('subtotalPrice').textContent = `$${subtotal}`;
+                document.getElementById('deliveryPrice').textContent = deliveryFee > 0 ? `$${deliveryFee}` : 'Free';
+                document.getElementById('totalPrice').textContent = `$${total}`;
+
+                subtotalRow.classList.remove('hidden');
+                deliveryRow.classList.remove('hidden');
+                totalRow.classList.remove('hidden');
+            }
         }
 
         async function submitOrder() {
@@ -913,9 +1006,9 @@
                 return;
             }
 
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Submitting...';
 
             // Build order items
             let orderItems = [];
@@ -975,6 +1068,7 @@
         function showSuccess(orderData) {
             document.getElementById('orderForm').classList.add('hidden');
             document.getElementById('successMessage').classList.remove('hidden');
+            document.getElementById('checkoutBar').classList.add('hidden');
 
             const pickupLabels = {
                 'central': 'Pick up at Central Market',
@@ -1021,7 +1115,7 @@
             // Reset UI
             document.getElementById('orderForm').classList.remove('hidden');
             document.getElementById('successMessage').classList.add('hidden');
-            document.getElementById('submitBtn').textContent = 'Place Order';
+            document.getElementById('checkoutBar').classList.remove('hidden');
 
             updateSummary();
             window.scrollTo(0, 0);
