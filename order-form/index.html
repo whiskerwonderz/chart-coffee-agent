@@ -798,7 +798,7 @@
                 </div>
                 <div class="delivery-notice hidden" id="deliveryNotice">
                     <span class="notice-icon">!</span>
-                    <span class="notice-text">Add <strong id="amountNeeded">$20</strong> more to qualify for free delivery</span>
+                    <span class="notice-text">Items: <strong id="currentSubtotal">$0</strong> — Add <strong id="amountNeeded">$20</strong> more to reach $500 for free delivery</span>
                 </div>
             </div>
 
@@ -966,6 +966,7 @@
             if (selectedPickup.method === 'delivery-free' && subtotal < 500) {
                 const remaining = 500 - subtotal;
                 amountNeeded.textContent = '$' + remaining;
+                document.getElementById('currentSubtotal').textContent = '$' + subtotal;
                 notice.classList.remove('hidden');
             } else {
                 notice.classList.add('hidden');
