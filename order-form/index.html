@@ -572,6 +572,42 @@
             display: none !important;
         }
 
+        /* Delivery Notice */
+        .delivery-notice {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            padding: 12px 14px;
+            background: rgba(239, 83, 80, 0.1);
+            border: 1px solid rgba(239, 83, 80, 0.3);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--error);
+        }
+
+        .notice-icon {
+            width: 20px;
+            height: 20px;
+            background: var(--error);
+            color: #1a1a1a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .notice-text {
+            color: var(--text-secondary);
+        }
+
+        .notice-text strong {
+            color: var(--accent);
+        }
+
         /* Desktop */
         @media (min-width: 520px) {
             body {
@@ -760,6 +796,10 @@
                         <div class="pickup-price">Free</div>
                     </div>
                 </div>
+                <div class="delivery-notice hidden" id="deliveryNotice">
+                    <span class="notice-icon">!</span>
+                    <span class="notice-text">Add <strong id="amountNeeded">$20</strong> more to qualify for free delivery</span>
+                </div>
             </div>
 
             <!-- Customer Info Section -->
@@ -887,6 +927,7 @@
             quantities[productId] = newQty;
             document.getElementById(`${productId}-qty`).textContent = newQty;
             updateSummary();
+            updateDeliveryNotice();
         }
 
         function selectPickup(element, method, fee) {
@@ -906,6 +947,29 @@
             }
 
             updateSummary();
+            updateDeliveryNotice();
+        }
+
+        function updateDeliveryNotice() {
+            const notice = document.getElementById('deliveryNotice');
+            const amountNeeded = document.getElementById('amountNeeded');
+
+            // Calculate current subtotal
+            let subtotal = 0;
+            for (const [id, qty] of Object.entries(quantities)) {
+                if (qty > 0) {
+                    subtotal += products[id].price * qty;
+                }
+            }
+
+            // Show notice only when free delivery is selected AND subtotal < $500
+            if (selectedPickup.method === 'delivery-free' && subtotal < 500) {
+                const remaining = 500 - subtotal;
+                amountNeeded.textContent = '$' + remaining;
+                notice.classList.remove('hidden');
+            } else {
+                notice.classList.add('hidden');
+            }
         }
 
         function updateSummary() {
