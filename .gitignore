@@ -2,3 +2,6 @@
 *.log
 node_modules/
 .env
+.claude/
+chart-coffee-orders.csv
+*.csv
