@@ -608,6 +608,50 @@
             color: var(--accent);
         }
 
+        /* Address text in confirmation - right align like other rows */
+        .summary-row.address-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .summary-row.address-row .address-label {
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .summary-row.address-row .address-value {
+            text-align: right;
+            word-break: break-word;
+            color: var(--text-primary);
+        }
+
+        /* Loading state for submit button with pulsing animation */
+        .checkout-btn.loading {
+            pointer-events: none;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+
+        .checkout-btn.loading .dot {
+            display: inline-block;
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+
+        .checkout-btn.loading .dot:nth-child(1) { animation-delay: 0s; }
+        .checkout-btn.loading .dot:nth-child(2) { animation-delay: 0.2s; }
+        .checkout-btn.loading .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
         /* Desktop */
         @media (min-width: 520px) {
             body {
@@ -1072,8 +1116,12 @@
             }
 
             const checkoutBtn = document.getElementById('checkoutBtn');
+            const originalText = checkoutBtn.textContent;
             checkoutBtn.disabled = true;
-            checkoutBtn.textContent = 'Submitting...';
+            checkoutBtn.classList.add('loading');
+
+            // Animated bouncing dots (CSS handles the animation)
+            checkoutBtn.innerHTML = 'Submitting<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';
 
             // Build order items
             let orderItems = [];
@@ -1125,8 +1173,10 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                // Still show success for demo purposes
-                showSuccess(orderData);
+                checkoutBtn.classList.remove('loading');
+                checkoutBtn.disabled = false;
+                updateSummary(); // Restore proper button text
+                alert('Something went wrong. Please try again.');
             }
         }
 
@@ -1149,7 +1199,7 @@
                 <div class="summary-row"><span>Phone</span><span>${orderData.customer.phone}</span></div>
                 <div class="summary-row"><span>Method</span><span>${pickupLabels[orderData.pickup]}</span></div>
                 ${orderData.pickupDate ? `<div class="summary-row"><span>Pickup Date</span><span>${pickupDateStr}</span></div>` : ''}
-                ${orderData.customer.address ? `<div class="summary-row"><span>Address</span><span>${orderData.customer.address}</span></div>` : ''}
+                ${orderData.customer.address ? `<div class="summary-row address-row"><span class="address-label">Address</span><span class="address-value">${orderData.customer.address}</span></div>` : ''}
                 <div class="summary-row total"><span>Total</span><span class="price">$${orderData.total}</span></div>
             `;
         }
