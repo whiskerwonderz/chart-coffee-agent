@@ -1121,6 +1121,20 @@
                 return;
             }
 
+            // Check free delivery minimum
+            if (selectedPickup.method === 'delivery-free') {
+                let checkSubtotal = 0;
+                for (const [id, qty] of Object.entries(quantities)) {
+                    if (qty > 0) {
+                        checkSubtotal += products[id].price * qty;
+                    }
+                }
+                if (checkSubtotal < 500) {
+                    alert('Free delivery requires a minimum order of $500. Your current subtotal is $' + checkSubtotal + '. Please add more items or select a different delivery option.');
+                    return;
+                }
+            }
+
             const checkoutBtn = document.getElementById('checkoutBtn');
             const originalText = checkoutBtn.textContent;
             checkoutBtn.disabled = true;
