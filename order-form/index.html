@@ -1071,8 +1071,17 @@
                 totalRow.classList.add('hidden');
             } else {
                 checkoutBar.classList.remove('empty');
-                checkoutBtn.disabled = false;
-                checkoutBtn.textContent = `Place Order • $${total}`;
+
+                // Check if free delivery selected but minimum not met
+                const freeDeliveryBlocked = selectedPickup.method === 'delivery-free' && subtotal < 500;
+
+                if (freeDeliveryBlocked) {
+                    checkoutBtn.disabled = true;
+                    checkoutBtn.textContent = `Min $500 for Free Delivery`;
+                } else {
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = `Place Order • $${total}`;
+                }
 
                 // Update checkout bar details
                 document.getElementById('checkoutItemsCount').textContent = `${totalQty} item${totalQty > 1 ? 's' : ''}`;
@@ -1119,20 +1128,6 @@
             if (!selectedPickup.method.includes('delivery') && !pickupDate) {
                 alert('Please select a pickup date.');
                 return;
-            }
-
-            // Check free delivery minimum
-            if (selectedPickup.method === 'delivery-free') {
-                let checkSubtotal = 0;
-                for (const [id, qty] of Object.entries(quantities)) {
-                    if (qty > 0) {
-                        checkSubtotal += products[id].price * qty;
-                    }
-                }
-                if (checkSubtotal < 500) {
-                    alert('Free delivery requires a minimum order of $500. Your current subtotal is $' + checkSubtotal + '. Please add more items or select a different delivery option.');
-                    return;
-                }
             }
 
             const checkoutBtn = document.getElementById('checkoutBtn');
